@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html class="x-admin-sm">
+    <head>
+        <meta charset="UTF-8">
+        <title></title>
+        <meta name="renderer" content="webkit">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+        <link rel="stylesheet" href="/static/css/font.css">
+        <link rel="stylesheet" href="/static/css/xadmin.css">
+        <script src="/static/lib/layui/layui.js" charset="utf-8"></script>
+        <script type="text/javascript" src="/static/js/xadmin.js"></script>
+    </head>
+    <body>
+        <div class="layui-fluid">
+            <div class="layui-row layui-col-space15">
+            <div class="layui-col-md8">
+                <div class="layui-card">
+                <div class="layui-card-header"><h3>{{ bankname }} - 数据统计</h3><span class="x-red"></span></div>
+                    <div class="layui-card-body ">
+                        <form action="/business" method="get">
+                                <div class="layui-input-inline" name="single_select">
+                                    <select name="dimension" id="dimension" class="layui-form-select" style="width: 100px"
+                                            lay-verify="required">
+                                        {% if dimension == 'month' %}
+                                            <option value="month" selected>月度</option>
+                                            <option value="quarter">季度</option>
+                                            <option value="year">年度</option>
+                                        {% elif dimension == 'quarter'%}
+                                            <option value="month" >月度</option>
+                                            <option value="quarter" selected>季度</option>
+                                            <option value="year">年度</option>
+                                        {% elif dimension == 'year'%}
+                                            <option value="month" >月度</option>
+                                            <option value="quarter" >季度</option>
+                                            <option value="year" selected>年度</option>
+                                        {% else %}
+                                            <option value="month">月度</option>
+                                            <option value="quarter">季度</option>
+                                            <option value="year">年度</option>
+                                        {% endif %}
+                                    </select>
+                                </div>
+                        <button class="layui-btn" data-type="reload" id="search">统计</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-col-md8">
+                <div class="layui-card">
+                <div class="layui-card-header"><h3 style="color: royalblue">用户统计</h3></div>
+                    <div class="layui-card-body ">
+{#                        <label class="layui-form-label" ><h3 >用户统计</h3></label>#}
+                        <div class="layui-card-body" style="min-height: 280px;">
+                            <div id="main1" class="layui-col-sm12" style="height: 300px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-col-md8">
+                <div class="layui-card">
+                <div class="layui-card-header"><h3 style="color: royalblue">账户类型统计</h3></div>
+                    <div class="layui-card-body ">
+                        <div class="layui-card-body" style="min-height: 280px;">
+                            <div id="main2" class="layui-col-sm12" style="height: 300px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-col-md8">
+                <div class="layui-card">
+                <div class="layui-card-header"><h3 style="color: royalblue">业务存储统计</h3></div>
+                    <div class="layui-card-body ">
+                        <div class="layui-card-body" style="min-height: 280px;">
+                            <div id="main3" class="layui-col-sm12" style="height: 300px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+                </div>
+             </div>
+            <style id="welcome_style"></style>
+    </body>
+<script src="/static/js/echarts.min.js"></script>
+<script type="text/javascript">
+
+    // 用户统计
+    var myChart1 = echarts.init(document.getElementById('main1'));
+
+    // 指定图表的配置项和数据
+    var option1 = {
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+                type: 'cross',
+                crossStyle: {
+                    color: '#991886'
+                }
+            }
+        },
+        toolbox: {
+            feature: {
+                dataView: {show: true, readOnly: false},
+                magicType: {show: true, type: ['line', 'bar']},
+                restore: {show: true},
+                saveAsImage: {show: true}
+            }
+        },
+        legend: {
+            data: ['用户量']
+        },
+        xAxis: [
+            {
+                type: 'category',
+                data: {{ data|safe }},
+                axisPointer: {
+                    type: 'shadow'
+                }
+            }
+        ],
+        yAxis: [
+            {
+                type: 'value',
+                name: '数量',
+                {#min: 0,#}
+                {#max: 250,#}
+                interval: 10,
+                axisLabel: {
+                    formatter: '{value}'
+                }
+            }
+        ],
+        series: [
+            {
+                color: '#39a2d9',
+                name: '用户量',
+                type: 'bar',
+                data: {{ customer_list|safe }}
+            }
+        ]
+    };
+    // 使用刚指定的配置项和数据显示图表。
+    myChart1.setOption(option1);
+
+    // 账户类型统计
+    var myChart2 = echarts.init(document.getElementById('main2'));
+
+    // 指定图表的配置项和数据
+    var option2 = {
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+                type: 'cross',
+                crossStyle: {
+                    color: '#991886'
+                }
+            }
+        },
+        toolbox: {
+            feature: {
+                dataView: {show: true, readOnly: false},
+                magicType: {show: true, type: ['line', 'bar']},
+                restore: {show: true},
+                saveAsImage: {show: true}
+            }
+        },
+        legend: {
+            data: ['储蓄账户', '支票账户']
+        },
+        xAxis: [
+            {
+                type: 'category',
+                data: {{ data|safe }},
+                axisPointer: {
+                    type: 'shadow'
+                }
+            }
+        ],
+        yAxis: [
+            {
+                type: 'value',
+                name: '数量',
+                {#min: 0,#}
+                {#max: 250,#}
+                interval: 10,
+                axisLabel: {
+                    formatter: '{value}'
+                }
+            }
+        ],
+        series: [
+            {
+                color: '#39a2d9',
+                name: '储蓄账户',
+                type: 'bar',
+                data: {{ storage_list|safe }}
+            },
+            {
+                color: '#67e0e3',
+                name: '支票账户',
+                type: 'bar',
+                data: {{ check_list|safe }}
+            }
+        ]
+    };
+    // 使用刚指定的配置项和数据显示图表。
+    myChart2.setOption(option2);
+
+    // 业务存储统计
+    var myChart3 = echarts.init(document.getElementById('main3'));
+
+    // 指定图表的配置项和数据
+    var option3 = {
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+                type: 'cross',
+                crossStyle: {
+                    color: '#991886'
+                }
+            }
+        },
+        toolbox: {
+            feature: {
+                dataView: {show: true, readOnly: false},
+                magicType: {show: true, type: ['line', 'bar']},
+                restore: {show: true},
+                saveAsImage: {show: true}
+            }
+        },
+        legend: {
+            data: ['储蓄', '贷款']
+        },
+        xAxis: [
+            {
+                type: 'category',
+                data: {{ data|safe }},
+                axisPointer: {
+                    type: 'shadow'
+                }
+            }
+        ],
+        yAxis: [
+            {
+                type: 'value',
+                name: '总额',
+                {#min: 0,#}
+                {#max: 250,#}
+                interval: 10000,
+                axisLabel: {
+                    formatter: '{value} 万'
+                }
+            }
+        ],
+        series: [
+            {
+                color: '#39a2d9',
+                name: '储蓄',
+                type: 'bar',
+                data: {{ storage_money_lis|safe }}
+            },
+            {
+                color: '#67e0e3',
+                name: '贷款',
+                type: 'bar',
+                data: {{ check_money_lis|safe }}
+            }
+        ]
+    };
+
+    // 使用刚指定的配置项和数据显示图表。
+    myChart3.setOption(option3);
+
+</script>
+<script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?b393d153aeb26b46e9431fabaf0f6190";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+    </script>
+</html>

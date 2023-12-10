@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+{% block title %}所有贷款{% endblock %}
+{% block content %}
+    <div class="layui-fluid">
+        <div class="layui-row layui-col-space15">
+            <div class="layui-col-md12">
+                <div class="layui-card">
+                    <div class="layui-card-body ">
+                        <a id="open_add_loan">
+                            <button class="layui-btn">新增贷款</button>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-col-md12">
+                <div class="layui-card">
+                    <div class="layui-fluid" style="margin-top: 0px;">
+                        <div class="">
+                            客户姓名：
+                            <div class="layui-inline">
+                                <input class="layui-input" name="cusname" id="cusname" autocomplete="off"
+                                       placeholder="请输入客户姓名查询">
+                            </div>
+                            <button class="layui-btn" data-type="reload" id="search">搜索</button>
+                        </div>
+                        <table id="all_loan" lay-filter="all_loan"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        layui.use(['element', 'table', 'util'], function () {
+            var element = layui.element,
+                $ = layui.jquery,
+                table = layui.table,
+                util = layui.util;
+
+            var dt = table.render({
+                elem: "#all_loan",
+                url: "/all_loan",
+                page: true,
+                id: 'all_loan',
+                cols: [[
+                    {field: 'customer', title: '贷款人', align: 'center'},
+                    {field: 'bank', title: '贷款银行', align: 'center'},
+                    {field: 'money', title: '贷款金额', align: 'center'},
+                    {field: 'to_lend_money', title: '以放款金额', align: 'center'},
+                    {field: 'state', title: '贷款状态', align: 'center', templet:state},
+                    {field: 'create_time', title: '贷款时间', align: 'center'},
+                    {fixed: 'right', title: '操作', align: 'center', toolbar: '#tools', width: 180}
+                ]]
+            });
+
+            function state(data){
+                if (data.state==='0'){
+                    return '<span style="color: #2F4056">未放款</span>'
+                }
+                if (data.state==='1'){
+                    return '<span style="color: #009688">放款中</span>'
+                }
+                if (data.state==='2'){
+                    return '<span style="color: #1E9FFF">放款完成</span>'
+                }
+            }
+
+            table.on('tool(all_loan)', function (obj) {
+                var data = obj.data;
+                var layEvent = obj.event;
+                var tr = obj.tr;
+                var currPage = dt.config.page.curr;
+                var loanID = data.loanID;
+                if (layEvent === "make_loans") {
+                    layer.open({
+                        title: '放款',
+                        type: 2,
+                        content: '/make_loans/' + loanID,
+                        area: ['600px', '580px'],
+                        end: function () {
+                            dt.reload()
+                        }
+                    })
+                }
+
+                if (layEvent === 'delete') {
+                    layer.confirm('确认删除吗？', {icon: 5, shade: 0.1}, function (index) {
+                        $.post("/del_loan/"+loanID, {
+                            cusID: data.cusID
+                        }, function (success) {
+                            if (success.code === 0) {
+                                obj.del();
+                                dt.reload({
+                                    page: {curr: 1}
+                                });
+                                layer.msg("删除成功");
+                            }else{
+                                layer.msg(success.msg);
+                            }
+                        })
+                    });
+                }
+            });
+            active = {
+                reload: function () {
+                    var cusname = $('#cusname');
+
+                    //执行重载
+                    table.reload('all_loan', {
+                        page: {
+                            curr: 1 //重新从第 1 页开始
+                        }
+                        , where: {
+                            cusname: cusname.val()
+                        }
+                    }, 'data');
+                }
+            };
+
+            $('#search').on('click', function () {
+                var type = $(this).data('type');
+                console.log(type);
+                active[type] ? active[type].call(this) : '';
+                {#console.log(active[type] ? active[type].call(this) : '')#}
+            });
+
+            $('#open_add_loan').on('click', function () {
+                layer.open({
+                    title: '新增贷款',
+                    type: 2,
+                    content: '/add_loan',
+                    area: ['600px', '580px'],
+                    end: function () {
+                        dt.reload()
+                    }
+                })
+            });
+
+        });
+
+    </script>
+    <script type="text/html" id="tools">
+        <a class="layui-btn layui-btn-xs " lay-event="make_loans">放款</a>
+        <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="delete">删除</a>
+    </script>
+{% endblock %}

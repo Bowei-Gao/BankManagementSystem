@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% block title %}账号申请{% endblock %}
+{% block content %}
+<body>
+<style>
+    .layui-form-left {
+        float: left;
+        display: block;
+        padding: 9px 15px;
+        width: 80px;
+        font-weight: 400;
+        line-height: 20px;
+        text-align: left;
+    }
+</style>
+<div class="layui-fluid">
+    <div class="layui-card">
+        <div class="layui-card-header">
+            <span>工号申请</span>
+        </div>
+        <div class="layui-card-body">
+            <form class="layui-form" id="edit_customer_form">
+                <div class="layui-form-item">
+                    <label class="layui-form-label"><span class="x-red">*</span>姓名:</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="cusname" id="cusname" class="layui-input" lay-verify="required" placeholder="请输入姓名"
+                        value="{{ customer_info.cusname }}">
+                        <input type="hidden" name="cusID" id="cusID" value="{{ customer_info.cusID }}">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label"><span class="x-red">*</span>手机号码:</label>
+                    <div class="layui-input-inline">
+                        <input type="number" name="cusphone" id="cusphone" class="layui-input" lay-verify="required" placeholder="请输入手机号码"
+                        value="{{ customer_info.cusphone }}">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label"><span class="x-red">*</span>地址:</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="address" id="address" class="layui-input" lay-verify="required" placeholder="请输入手机号码"
+                        value="{{ customer_info.address }}">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label"><span class="x-red">*</span>联系人姓名:</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="contact_name" id="contact_name" class="layui-input" lay-verify="required" placeholder="请输入手机号码"
+                        value="{{ customer_info.contact_name }}">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label"><span class="x-red">*</span>联系人号码:</label>
+                    <div class="layui-input-inline">
+                        <input type="number" name="contact_phone" id="contact_phone" class="layui-input" lay-verify="required" placeholder="请输入手机号码"
+                        value="{{ customer_info.contact_phone }}">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label"><span class="x-red">*</span>联系人邮箱:</label>
+                    <div class="layui-input-inline">
+                        <input type="email" name="contact_Email" id="contact_Email" class="layui-input" lay-verify="required" placeholder="请输入手机号码"
+                        value="{{ customer_info.contact_Email }}">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label"><span class="x-red">*</span>联系人关系:</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="relation" id="relation" class="layui-input" lay-verify="required" placeholder="请输入手机号码"
+                        value="{{ customer_info.relation }}">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-input-block">
+                        <button type="button" class="layui-btn" lay-submit id="edit_customer"
+                                lay-filter="edit_customer">
+                            修改
+                        </button>
+                        <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+{% endblock %}
+{% block script %}
+    <script>
+        layui.use(['layer', 'jquery', 'form', 'element', 'util', 'table'], function () {
+            var layer = layui.layer,
+                form = layui.form,
+                table = layui.table,
+                $ = layui.jquery;
+            var index = parent.layer.getFrameIndex(window.name)
+            form.on("submit(edit_customer)", function (data) {
+                $.post("/edit_customer", $("#edit_customer_form").serialize(), function (res) {
+                    if (res.code === 0) {
+                        layer.msg('修改成功！', {
+                            icon: 6,
+                            time: 1000,},
+                            function () {
+                                parent.layer.close(index);
+                            }
+                        )
+                    } else {
+                        layer.alert(res.msg, {icon: 6})
+                    }
+                })
+            });
+        });
+    </script>
+{% endblock %}
+

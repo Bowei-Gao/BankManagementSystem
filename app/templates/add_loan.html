@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% block title %}开户{% endblock %}
+{% block content %}
+    <body>
+    <style>
+        .layui-form-left {
+            float: left;
+            display: block;
+            padding: 9px 15px;
+            width: 80px;
+            font-weight: 400;
+            line-height: 20px;
+            text-align: left;
+        }
+    </style>
+    <div class="layui-fluid">
+        <div class="layui-card">
+            <div class="layui-card-body">
+                <form class="layui-form" id="add_loan_form">
+                    <div class="layui-form-item">
+                        <label class="layui-form-label"><span class="x-red">*</span>贷款银行:</label>
+                        <div class="layui-input-inline">
+                            <label class="layui-form-left">{{ bank.bankname }}</label>
+                            <input type="hidden" name="bankId" id="bankId" class="layui-input" lay-verify="required"
+                                   value="{{ bank.bankId }}" readonly>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label"><span class="x-red">*</span>选择贷款账户:</label>
+                        <div class="layui-input-inline">
+                            <select name="cusID" id="cusID" class="layui-form-select" style="width: 200px"
+                                    lay-verify="required">
+                                {% for customer in customer_info %}
+                                    <option value="{{ customer.cusID }}">{{ customer.cusname }}</option>
+                                {% endfor %}
+                            </select>
+                            <input type="hidden" name="empID" id="empID" class="layui-input" lay-verify="required"
+                                   value="{{ emp_info.empID }}" readonly>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label"><span class="x-red">*</span>贷款金额:</label>
+                        <div class="layui-input-inline">
+                            <input type="number" name="money" id="money" class="layui-input" lay-verify="required"
+                                   placeholder="请输入贷款金额">
+                        </div>
+                        <span class="x-red">*</span>可用贷款额度：<span class="x-red">{{ available }}</span>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <div class="layui-input-block">
+                            <button type="button" class="layui-btn" lay-submit id="add_loan"
+                                    lay-filter="add_loan">
+                                申请贷款
+                            </button>
+                            <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    </body>
+{% endblock %}
+{% block script %}
+    <script>
+        layui.use(['layer', 'jquery', 'form', 'element', 'util', 'table'], function () {
+            var layer = layui.layer,
+                form = layui.form,
+                table = layui.table,
+                $ = layui.jquery;
+            var index = parent.layer.getFrameIndex(window.name)
+            form.on("submit(add_loan)", function (data) {
+                $.post("/add_loan", $("#add_loan_form").serialize(), function (res) {
+                    if (res.code === 0) {
+                        layer.msg(res.msg, {
+                                icon: 6,
+                                time: 1000,
+                            },
+                            function () {
+                                parent.layer.close(index);
+                            }
+                        )
+                    } else {
+                        layer.alert(res.msg, {icon: 6})
+                    }
+                })
+            });
+        });
+    </script>
+{% endblock %}
+

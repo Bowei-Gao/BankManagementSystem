@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+{% block title %}所有账户{% endblock %}
+{% block content %}
+    <div class="layui-fluid">
+        <div class="layui-row layui-col-space15">
+            <div class="layui-col-md12">
+                <div class="layui-card">
+                    <div class="layui-card-body ">
+                        <a id="open_add_account">
+                            <button class="layui-btn">开户</button>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-col-md12">
+                <div class="layui-card">
+                    <div class="layui-fluid" style="margin-top: 0px;">
+                        <div class="demoTable">
+                            账号：
+                            <div class="layui-inline">
+                                <input class="layui-input" name="accountNumber" id="accountNumber" autocomplete="off"
+                                       placeholder="请输入账号查询">
+                            </div>
+                            <button class="layui-btn" data-type="reload" id="search">搜索</button>
+                        </div>
+                        <table id="all_account" lay-filter="all_account"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        layui.use(['element', 'table', 'util'], function () {
+            var element = layui.element,
+                $ = layui.jquery,
+                table = layui.table;
+
+            var dt = table.render({
+                elem: "#all_account",
+                url: "/all_account",
+                page: true,
+                id: 'all_account',
+                cols: [[
+                    {field: 'accountNumber', title: '账号', align: 'center'},
+                    {field: 'money', title: '余额', align: 'center'},
+                    {field: 'settime', title: '开户时间', align: 'center'},
+                    {field: 'accounttype', title: '账户类型', align: 'center'},
+                    {field: 'bank', title: '开户行', templet: bank, align: 'center'},
+                    {field: 'customer', title: '持卡人', templet: customer, align: 'center'},
+                    {fixed: 'right', title: '操作', align: 'center', toolbar: '#tools', width: 180}
+                ]]
+            });
+
+            function bank(data){
+                return data.bank.bankname
+            }
+
+            function customer(data){
+                return data.customer.cusname
+            }
+
+            table.on('tool(all_account)', function (obj) {
+                var data = obj.data;
+                var layEvent = obj.event;
+                var tr = obj.tr;
+                var currPage = dt.config.page.curr;
+                var accountID = data.accountID;
+                if (layEvent === "edit") {
+                    layer.open({
+                        title: '编辑账号',
+                        type: 2,
+                        content: '/edit_account/' + accountID,
+                        area: ['600px', '580px'],
+                        end: function () {
+                            dt.reload()
+                        }
+                    })
+                }
+
+                if (layEvent === 'delete') {
+                    layer.confirm('确认删除当前客户吗？', {icon: 5, shade: 0.1}, function (index) {
+                        $.post("/del_account/"+accountID, {
+                            cusID: data.cusID
+                        }, function (success) {
+                            if (success.code === 0) {
+                                obj.del();
+                                dt.reload({
+                                    page: {curr: 1}
+                                });
+                                layer.msg("删除成功");
+                            }else {
+                                layer.msg(success.msg)
+                            }
+                        })
+                    });
+                }
+            });
+            active = {
+                reload: function () {
+                    var accountNumber = $('#accountNumber');
+
+                    //执行重载
+                    table.reload('all_account', {
+                        page: {
+                            curr: 1 //重新从第 1 页开始
+                        }
+                        , where: {
+                            accountNumber: accountNumber.val()
+                        }
+                    }, 'data');
+                }
+            };
+
+            $('#search').on('click', function () {
+                var type = $(this).data('type');
+                console.log(type);
+                active[type] ? active[type].call(this) : '';
+                console.log(active[type] ? active[type].call(this) : '')
+            });
+
+            $('#open_add_account').on('click', function () {
+                layer.open({
+                    title: '开户',
+                    type: 2,
+                    content: '/add_account',
+                    area: ['600px', '580px'],
+                    end: function () {
+                        dt.reload()
+                    }
+                })
+            });
+
+        });
+
+    </script>
+    <script type="text/html" id="tools">
+        <a class="layui-btn layui-btn-xs " lay-event="edit">修改</a>
+        <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="delete">删除</a>
+    </script>
+{% endblock %}
